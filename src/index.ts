@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import urlRoutes from "@route";
@@ -50,8 +50,12 @@ app.use("*", (req, res) => {
   });
 });
 
-app.use((err: any, res: express.Response) => {
-  console.error("Error:", err);
+// Express requires exactly four parameters to recognise a function as an error
+// handler. With fewer params it is treated as regular middleware and never
+// called when next(err) or an unhandled throw reaches this point.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("Unhandled error:", err);
   res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
     success: false,
     error: "Internal server error",
